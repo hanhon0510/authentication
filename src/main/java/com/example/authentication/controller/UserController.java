@@ -27,6 +27,12 @@ public class UserController {
     }
 
     @Operation(summary = "Create new user")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Sign up successfully"),
+            @ApiResponse(responseCode = "400", description = "All fields need to be filled"),
+            @ApiResponse(responseCode = "401", description = "Your password needs to have 8 or more characters"),
+            @ApiResponse(responseCode = "409", description = "Your username has been used")
+    })
     @PostMapping("/signup")
     public ResponseEntity<String> signUp(@RequestBody UserRegistrationDto userDto) {
         String username = userDto.getUsername();
