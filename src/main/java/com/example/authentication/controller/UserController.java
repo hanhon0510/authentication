@@ -79,7 +79,7 @@ public class UserController {
         if (!isPasswordMatch) {
             return new ResponseEntity<>("Wrong password", HttpStatus.UNAUTHORIZED);
         }
-        return new ResponseEntity<>("Sign in successfully", HttpStatus.OK);
+        return new ResponseEntity<>(user.getPassword(), HttpStatus.OK);
 
     }
 
