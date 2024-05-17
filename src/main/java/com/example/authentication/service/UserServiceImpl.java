@@ -1,6 +1,5 @@
 package com.example.authentication.service;
 
-import com.example.authentication.exception.UserException;
 import com.example.authentication.repository.UserRepository;
 import com.example.authentication.model.User;
 import io.jsonwebtoken.Jwts;
