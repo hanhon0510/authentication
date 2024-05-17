@@ -2,6 +2,7 @@ package com.example.authentication.controller;
 
 import com.example.authentication.DTO.UserRegistrationDto;
 import com.example.authentication.DTO.UserSignInDto;
+import com.example.authentication.config.JwtProvider;
 import com.example.authentication.model.User;
 import com.example.authentication.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,7 +54,9 @@ public class UserControllerTest {
 
         ResponseEntity<String> response = userController.signUp(userDto);
 
-        assert response.getStatusCode() == HttpStatus.CREATED;
+        assertEquals(HttpStatus.CREATED, response.getStatusCode(), "Expected HTTP status code to be CREATED");
+        assertEquals("Sign up successfully", response.getBody(), "The response body message is incorrect");
+
     }
 
     @Test
@@ -70,7 +73,9 @@ public class UserControllerTest {
 
         ResponseEntity<String> response = userController.signUp(userDto);
 
-        assert response.getStatusCode() == HttpStatus.CONFLICT;
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode(), "Expected HTTP status code to be CONFLICT");
+        assertEquals("Your username has been used", response.getBody(), "The response body message is incorrect");
+
     }
 
     @Test
@@ -81,11 +86,13 @@ public class UserControllerTest {
 
         ResponseEntity<String> response = userController.signUp(userDto);
 
-        assert response.getStatusCode() == HttpStatus.UNAUTHORIZED;
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode(), "Expected HTTP status code to be UNAUTHORIZED");
+        assertEquals("Your password needs to have 8 or more characters", response.getBody(), "The response body message is incorrect");
+
     }
 
     @Test
-    public void testSignInSuccess() {
+    public void testLoginSuccess() {
         UserSignInDto userDto = new UserSignInDto();
         userDto.setUsername("hieu");
         userDto.setPassword("hieuhieu");
@@ -94,13 +101,15 @@ public class UserControllerTest {
         User user = new User("hieu", hashedPassword);
         when(userService.findUser(eq("hieu"))).thenReturn(user);
 
+        String token = JwtProvider.generateToken(user);
         ResponseEntity<String> response = userController.signIn(userDto);
 
-        assert response.getStatusCode() == HttpStatus.OK;
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Expected HTTP status code to be OK");
+        assertEquals(token, response.getBody(), "The token is incorrect");
     }
 
     @Test
-    public void testSignInUserNotFound() {
+    public void testLoginUserNotFound() {
         UserSignInDto userDto = new UserSignInDto();
         userDto.setUsername("hieu");
         userDto.setPassword("password");
@@ -108,11 +117,13 @@ public class UserControllerTest {
         when(userService.findUser(eq("hieu"))).thenReturn(null);
 
         ResponseEntity<String> response = userController.signIn(userDto);
-        assert response.getStatusCode() == HttpStatus.NOT_FOUND;
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode(), "Expected HTTP status code to be NOT_FOUND");
+        assertEquals("Not found username", response.getBody(), "The response body message is incorrect");
     }
 
     @Test
-    public void testSignInWrongPassword() {
+    public void testLoginWrongPassword() {
         UserSignInDto userDto = new UserSignInDto();
         userDto.setUsername("hieu");
         userDto.setPassword("wrongpassword");
@@ -122,6 +133,8 @@ public class UserControllerTest {
         when(userService.findUser(eq("hieu"))).thenReturn(user);
 
         ResponseEntity<String> response = userController.signIn(userDto);
-        assert response.getStatusCode() == HttpStatus.UNAUTHORIZED;
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode(), "Expected HTTP status code to be UNAUTHORIZED");
+        assertEquals("Wrong password", response.getBody(), "The response body message is incorrect");
     }
 }

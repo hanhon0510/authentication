@@ -9,4 +9,5 @@ public interface UserService {
     public User createUser(String username, String password);
 
     User findUser(String username);
+
 }

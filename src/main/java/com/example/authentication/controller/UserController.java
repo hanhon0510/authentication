@@ -2,6 +2,7 @@ package com.example.authentication.controller;
 
 import com.example.authentication.DTO.UserRegistrationDto;
 import com.example.authentication.DTO.UserSignInDto;
+import com.example.authentication.config.JwtProvider;
 import com.example.authentication.exception.UserException;
 import com.example.authentication.model.User;
 import com.example.authentication.service.UserService;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private UserService userService;
-    private final String key = "hash";
+//    private final String key = "hash";
 
     public UserController(UserService userService) {
         this.userService = userService;
@@ -53,14 +54,14 @@ public class UserController {
         return new ResponseEntity<>("Sign up successfully", HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Sign in if existed")
+    @Operation(summary = "Log in if existed")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Sign in successfully"),
+            @ApiResponse(responseCode = "200", description = "Log in successfully"),
             @ApiResponse(responseCode = "404", description = "User not found"),
             @ApiResponse(responseCode = "401", description = "Wrong password"),
             @ApiResponse(responseCode = "400", description = "All fields need to be filled")
     })
-    @PostMapping("/signin")
+    @PostMapping("/login")
     public ResponseEntity<String> signIn(@RequestBody UserSignInDto userDto) {
         String username = userDto.getUsername();
         String password = userDto.getPassword();
@@ -79,7 +80,9 @@ public class UserController {
         if (!isPasswordMatch) {
             return new ResponseEntity<>("Wrong password", HttpStatus.UNAUTHORIZED);
         }
-        return new ResponseEntity<>(user.getPassword(), HttpStatus.OK);
+        String token = JwtProvider.generateToken(user);
+        return new ResponseEntity<>(token, HttpStatus.OK);
+//        return new ResponseEntity<>(user.getPassword(), HttpStatus.OK);
 
     }
 
