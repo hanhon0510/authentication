@@ -1,5 +1,6 @@
 package com.example.authentication.model;
 
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
@@ -20,11 +21,16 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    @NotNull
+    @Column(name = "language")
+    private String language;
+
     public User(){}
 
     public User(String username, String password) {
         this.username = username;
         this.password = password;
+        this.language = "eng";
     }
 
     public Long getId() {
@@ -49,6 +55,14 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
     }
 
     @Override

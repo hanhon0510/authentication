@@ -46,6 +46,7 @@ public class UserControllerTest {
         UserRegistrationDto userDto = new UserRegistrationDto();
         userDto.setUsername("hieu");
         userDto.setPassword("hieuhieu");
+        userDto.setConfirmedPassword("hieuhieu");
 
         when(userService.findUser(eq("hieu"))).thenReturn(null);
         when(userService.createUser(eq("hieu"), any(String.class))).thenAnswer(i -> {
@@ -69,6 +70,7 @@ public class UserControllerTest {
         UserRegistrationDto userDto = new UserRegistrationDto();
         userDto.setUsername("hieu");
         userDto.setPassword("hieuhieu");
+        userDto.setConfirmedPassword("hieuhieu");
 
         User existingUser = new User("hieu", "hashedpassword");
         when(userService.findUser(eq("hieu"))).thenReturn(existingUser);
@@ -91,6 +93,7 @@ public class UserControllerTest {
         UserRegistrationDto userDto = new UserRegistrationDto();
         userDto.setUsername("hieu");
         userDto.setPassword("short");
+        userDto.setConfirmedPassword("short");
 
         ResponseEntity<?> response = userController.signUp(userDto);
 
@@ -99,6 +102,70 @@ public class UserControllerTest {
         assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode(), "Expected HTTP status code to be 400");
         assert userResponse != null;
         assertEquals("Your password needs to have 8 or more characters", userResponse.getMessage(), "The response body message is incorrect");
+
+    }
+    @Test
+    public void testSignUpWithNullUsername() {
+        UserRegistrationDto userDto = new UserRegistrationDto();
+        userDto.setUsername(null);
+        userDto.setPassword("hieuhieu");
+        userDto.setConfirmedPassword("hieuhieu");
+
+        ResponseEntity<?> response = userController.signUp(userDto);
+
+        UserResponse userResponse = (UserResponse) response.getBody();
+
+        assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode(), "Expected HTTP status code to be 400");
+        assert userResponse != null;
+        assertEquals("Username field need to be filled", userResponse.getMessage(), "The response body message is incorrect");
+
+    }
+    @Test
+    public void testSignUpWithNullPassword() {
+        UserRegistrationDto userDto = new UserRegistrationDto();
+        userDto.setUsername("hieu");
+        userDto.setPassword(null);
+        userDto.setConfirmedPassword("test");
+
+        ResponseEntity<?> response = userController.signUp(userDto);
+
+        UserResponse userResponse = (UserResponse) response.getBody();
+
+        assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode(), "Expected HTTP status code to be 400");
+        assert userResponse != null;
+        assertEquals("Password field need to be filled", userResponse.getMessage(), "The response body message is incorrect");
+
+    }
+    @Test
+    public void testSignUpWithNullConfirmedPassword() {
+        UserRegistrationDto userDto = new UserRegistrationDto();
+        userDto.setUsername("hieu");
+        userDto.setPassword("hieuhieu");
+        userDto.setConfirmedPassword(null);
+
+        ResponseEntity<?> response = userController.signUp(userDto);
+
+        UserResponse userResponse = (UserResponse) response.getBody();
+
+        assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode(), "Expected HTTP status code to be 400");
+        assert userResponse != null;
+        assertEquals("Confirm password field need to be filled", userResponse.getMessage(), "The response body message is incorrect");
+
+    }
+    @Test
+    public void testSignUpPasswordNotMatchedConfirmedPassword() {
+        UserRegistrationDto userDto = new UserRegistrationDto();
+        userDto.setUsername("hieu");
+        userDto.setPassword("hieuhieu");
+        userDto.setConfirmedPassword("12345678");
+
+        ResponseEntity<?> response = userController.signUp(userDto);
+
+        UserResponse userResponse = (UserResponse) response.getBody();
+
+        assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode(), "Expected HTTP status code to be 400");
+        assert userResponse != null;
+        assertEquals("Your password and confirm password are not the same", userResponse.getMessage(), "The response body message is incorrect");
 
     }
 
@@ -120,6 +187,36 @@ public class UserControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Expected HTTP status code to be OK");
         assert userResponse != null;
         assertEquals(token, userResponse.getMessage(), "The token is incorrect");
+    }
+
+    @Test
+    public void testLoginWithNullUsername() {
+        UserSignInDto userDto = new UserSignInDto();
+        userDto.setUsername(null);
+        userDto.setPassword("hieuhieu");
+
+        ResponseEntity<?> response = userController.signIn(userDto);
+
+        UserResponse userResponse = (UserResponse) response.getBody();
+
+        assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode(), "Expected HTTP status code to be 400");
+        assert userResponse != null;
+        assertEquals("Username field need to be filled", userResponse.getMessage(), "The response body message is incorrect");
+    }
+
+    @Test
+    public void testLoginWithNullPassword() {
+        UserSignInDto userDto = new UserSignInDto();
+        userDto.setUsername("hieu");
+        userDto.setPassword(null);
+
+        ResponseEntity<?> response = userController.signIn(userDto);
+
+        UserResponse userResponse = (UserResponse) response.getBody();
+
+        assertEquals(HttpStatusCode.valueOf(400), response.getStatusCode(), "Expected HTTP status code to be 400");
+        assert userResponse != null;
+        assertEquals("Password field need to be filled", userResponse.getMessage(), "The response body message is incorrect");
     }
 
     @Test

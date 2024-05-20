@@ -25,21 +25,33 @@ public class UserController {
     @Operation(summary = "Create new user")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Sign up successfully"),
-            @ApiResponse(responseCode = "400", description = "All fields need to be filled"),
+            @ApiResponse(responseCode = "400", description = "Username field need to be filled"),
+            @ApiResponse(responseCode = "400", description = "Password field need to be filled"),
+            @ApiResponse(responseCode = "400", description = "Confirm password field need to be filled"),
             @ApiResponse(responseCode = "400", description = "Your password needs to have 8 or more characters"),
+            @ApiResponse(responseCode = "400", description = "Your password and confirm password are not the same"),
             @ApiResponse(responseCode = "400", description = "Password or username invalid")
     })
     @PostMapping("/signup")
     public ResponseEntity<?> signUp(@RequestBody UserRegistrationDto userDto) {
         String username = userDto.getUsername();
         String password = userDto.getPassword();
+        String confirmedPassword = userDto.getConfirmedPassword();
 
-        if (username == null || password == null) {
-            return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", "All fields need to be filled"));
+        if (username == null) {
+            return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", "Username field need to be filled"));
+        }
+        if (password == null) {
+            return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", "Password field need to be filled"));
+        }
+        if (confirmedPassword == null) {
+            return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", "Confirm password field need to be filled"));
         }
         if (password.length() < 8) {
             return ResponseEntity.status(400).body(new UserResponse(400,"Bad request", "Your password needs to have 8 or more characters"));
-
+        }
+        if (!password.equals(confirmedPassword)) {
+            return ResponseEntity.status(400).body(new UserResponse(400,"Bad request", "Your password and confirm password are not the same"));
         }
         if (userService.findUser(username) != null) {
             return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", "Password or username invalid"));
@@ -56,17 +68,19 @@ public class UserController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Log in successfully"),
             @ApiResponse(responseCode = "400", description = "Password or username invalid"),
-            @ApiResponse(responseCode = "400", description = "Password or username invalid"),
-            @ApiResponse(responseCode = "400", description = "All fields need to be filled")
+            @ApiResponse(responseCode = "400", description = "Username field need to be filled"),
+            @ApiResponse(responseCode = "400", description = "Password field need to be filled"),
     })
     @PostMapping("/login")
     public ResponseEntity<?> signIn(@RequestBody UserSignInDto userDto) {
         String username = userDto.getUsername();
         String password = userDto.getPassword();
 
-        if (username == null || password == null) {
-            return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", "All fields need to be filled"));
-
+        if (username == null) {
+            return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", "Username field need to be filled"));
+        }
+        if (password == null) {
+            return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", "Password field need to be filled"));
         }
 
         User user = userService.findUser(username);
