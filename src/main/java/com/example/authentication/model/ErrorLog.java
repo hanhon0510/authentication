@@ -21,11 +21,11 @@ public class ErrorLog {
     private Long id;
 
     @NotNull
-    @Column(name = "errMessage")
+    @Column(name = "errMessage", columnDefinition = "TEXT")
     private String errMessage;
 
     @NotNull
-    @Column(name = "errStackTrace")
+    @Column(name = "errStackTrace", columnDefinition = "LONGTEXT")
     private String errStackTrace;
 
     @NotNull

@@ -5,6 +5,8 @@ import com.example.authentication.DTO.UserSignInDto;
 import com.example.authentication.config.JwtProvider;
 import com.example.authentication.constant.ErrorCode;
 import com.example.authentication.exception.AppException;
+import com.example.authentication.model.ErrorLog;
+import com.example.authentication.repository.ErrorLogRepository;
 import com.example.authentication.repository.UserRepository;
 import com.example.authentication.model.User;
 import com.example.authentication.response.AuthenticationResponse;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Locale;
 
 @Service
@@ -23,8 +26,11 @@ public class UserServiceImpl implements UserService {
     private MessageSource messageSource;
     private UserRepository userRepository;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    private ErrorLogRepository errorLogRepository;
+
+    public UserServiceImpl(UserRepository userRepository, ErrorLogRepository errorLogRepository) {
         this.userRepository = userRepository;
+        this.errorLogRepository = errorLogRepository;
     }
 
 
