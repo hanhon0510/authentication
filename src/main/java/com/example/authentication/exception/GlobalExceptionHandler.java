@@ -1,5 +1,6 @@
 package com.example.authentication.exception;
 
+import com.example.authentication.config.ErrorNotificationConfig;
 import com.example.authentication.constant.ErrorCode;
 import com.example.authentication.model.ErrorLog;
 import com.example.authentication.repository.ErrorLogRepository;
@@ -26,6 +27,9 @@ public class GlobalExceptionHandler {
 
     @Autowired
     private ErrorLogRepository errorLogRepository;
+
+    @Autowired
+    private ErrorNotificationConfig errorNotificationConfig;
 
     @Autowired
     private MailUtil mailUtil;
@@ -55,7 +59,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<BaseResponse> handleGenericException(Exception ex, WebRequest request) {
-        mailUtil.sendEmail("21021494@vnu.edu.vn", "Error", ex.getMessage());
+        mailUtil.sendEmail(errorNotificationConfig.getEmail(), errorNotificationConfig.getSubject(), ex.getMessage());
 
 
         errorLogUtil.logError(ex);
