@@ -3,18 +3,36 @@ package com.example.authentication.controller;
 import com.example.authentication.DTO.UserRegistrationDto;
 import com.example.authentication.DTO.UserSignInDto;
 import com.example.authentication.config.JwtProvider;
-import com.example.authentication.exception.UserResponse;
+import com.example.authentication.exception.AppException;
+import com.example.authentication.response.AuthenticationResponse;
+import com.example.authentication.response.BaseResponse;
+import com.example.authentication.response.UserResponse;
 import com.example.authentication.model.User;
 import com.example.authentication.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.NoSuchMessageException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.LocaleResolver;
+
+import java.util.Locale;
 
 @RestController
 public class UserController {
+
+    @Autowired
+    private MessageSource messageSource;
+
+    @Autowired
+    private LocaleResolver localeResolver;
 
     private UserService userService;
 
@@ -22,82 +40,112 @@ public class UserController {
         this.userService = userService;
     }
 
-    @Operation(summary = "Create new user")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Sign up successfully"),
-            @ApiResponse(responseCode = "400", description = "Username field need to be filled"),
-            @ApiResponse(responseCode = "400", description = "Password field need to be filled"),
-            @ApiResponse(responseCode = "400", description = "Confirm password field need to be filled"),
-            @ApiResponse(responseCode = "400", description = "Your password needs to have 8 or more characters"),
-            @ApiResponse(responseCode = "400", description = "Your password and confirm password are not the same"),
-            @ApiResponse(responseCode = "400", description = "Password or username invalid")
-    })
+    @Operation(summary = "Create new user",
+            description = "Create a new account that does not exist yet.")
     @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@RequestBody UserRegistrationDto userDto) {
-        String username = userDto.getUsername();
-        String password = userDto.getPassword();
-        String confirmedPassword = userDto.getConfirmedPassword();
-
-        if (username == null) {
-            return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", "Username field need to be filled"));
+    public BaseResponse<UserResponse> createNewUser(@RequestBody @Valid UserRegistrationDto userRegistrationDto,
+                                                    @RequestParam(name = "lang", required = true) String lang) {
+        Locale locale = Locale.US;
+        if (lang == null) {
+            throw new AppException(400, messageSource.getMessage("nullLang", null, locale));
         }
-        if (password == null) {
-            return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", "Password field need to be filled"));
-        }
-        if (confirmedPassword == null) {
-            return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", "Confirm password field need to be filled"));
-        }
-        if (password.length() < 8) {
-            return ResponseEntity.status(400).body(new UserResponse(400,"Bad request", "Your password needs to have 8 or more characters"));
-        }
-        if (!password.equals(confirmedPassword)) {
-            return ResponseEntity.status(400).body(new UserResponse(400,"Bad request", "Your password and confirm password are not the same"));
-        }
-        if (userService.findUser(username) != null) {
-            return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", "Password or username invalid"));
+        locale = new Locale(lang);
+        if (userRegistrationDto.getUsername() == null) {
+            throw new AppException(400, messageSource.getMessage("nullUsername", null, locale));
         }
 
-        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
-        User user = userService.createUser(username, hashedPassword);
+        if (userRegistrationDto.getPassword() == null) {
+            throw new AppException(400, messageSource.getMessage("nullPassword", null, locale));
+        }
 
-        return ResponseEntity.status(200).body(new UserResponse(200, "OK", "Sign up successfully"));
+        if (userRegistrationDto.getConfirmedPassword() == null) {
+            throw new AppException(400, messageSource.getMessage("nullConfirmPassword", null, locale));
+        }
 
+        return BaseResponse.<UserResponse>builder()
+                .message("Sign up successfully")
+                .data(userService.createUser(userRegistrationDto, locale))
+                .build();
     }
-
     @Operation(summary = "Log in if existed")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Log in successfully"),
+            @ApiResponse(responseCode = "200", description = "Login successfully"),
             @ApiResponse(responseCode = "400", description = "Password or username invalid"),
             @ApiResponse(responseCode = "400", description = "Username field need to be filled"),
             @ApiResponse(responseCode = "400", description = "Password field need to be filled"),
     })
     @PostMapping("/login")
-    public ResponseEntity<?> signIn(@RequestBody UserSignInDto userDto) {
-        String username = userDto.getUsername();
-        String password = userDto.getPassword();
+    BaseResponse<AuthenticationResponse> login(@RequestBody @Valid UserSignInDto userSignInDto,
+                                               @RequestParam(name = "lang", required = true) String lang) {
 
-        if (username == null) {
-            return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", "Username field need to be filled"));
+        Locale locale = Locale.US;
+        if (lang == null) {
+            throw new AppException(400, messageSource.getMessage("nullLang", null, locale));
         }
-        if (password == null) {
-            return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", "Password field need to be filled"));
-        }
-
-        User user = userService.findUser(username);
-        if (user == null) {
-            return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", "Password or username invalid"));
+        locale = new Locale(lang);
+        if (userSignInDto.getUsername() == null) {
+            throw new AppException(400, messageSource.getMessage("nullUsername", null, locale));
         }
 
-        boolean isPasswordMatch = BCrypt.checkpw(password, user.getPassword());
-
-        if (!isPasswordMatch) {
-            return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", "Password or username invalid"));
-
+        if (userSignInDto.getPassword() == null) {
+            throw new AppException(400, messageSource.getMessage("nullPassword", null, locale));
         }
-        String token = JwtProvider.generateToken(user);
-        return ResponseEntity.status(200).body(new UserResponse(200, "Login successfully", token));
 
+        return BaseResponse.<AuthenticationResponse>builder()
+                .code(200)
+                .message("Login successfully")
+                .data(userService.login(userSignInDto, locale))
+                .build();
     }
+
+
+//    @Operation(summary = "Log in if existed")
+//    @ApiResponses({
+//            @ApiResponse(responseCode = "200", description = "Login successfully"),
+//            @ApiResponse(responseCode = "400", description = "Password or username invalid"),
+//            @ApiResponse(responseCode = "400", description = "Username field need to be filled"),
+//            @ApiResponse(responseCode = "400", description = "Password field need to be filled"),
+//    })
+//    @PostMapping("/login")
+//    public ResponseEntity<?> signIn(@RequestBody UserSignInDto userDto,
+//                                    @RequestParam(name = "lang", required = true) String lang) {
+//        String username = userDto.getUsername();
+//        String password = userDto.getPassword();
+//        Locale locale = Locale.US;
+//        if (lang != null) {
+//            locale = new Locale(lang);
+//        }
+//
+//        try {
+//            String nullUsername = messageSource.getMessage("nullUsername", null, locale);
+//            String nullPassword = messageSource.getMessage("nullPassword", null, locale);
+//            String invalidInput = messageSource.getMessage("invalidInput", null, locale);
+//            String loginSuccess = messageSource.getMessage("loginSuccess", null, locale);
+//
+//            if (username == null) {
+//                return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", nullUsername));
+//            }
+//            if (password == null) {
+//                return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", nullPassword));
+//            }
+//
+//            User user = userService.findUser(username);
+//            if (user == null) {
+//                return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", invalidInput));
+//            }
+//
+//            boolean isPasswordMatch = BCrypt.checkpw(password, user.getPassword());
+//
+//            if (!isPasswordMatch) {
+//                return ResponseEntity.status(400).body(new UserResponse(400, "Bad request", invalidInput));
+//
+//            }
+//            String token = JwtProvider.generateToken(user);
+//            return ResponseEntity.status(200).body(new UserResponse(200, "OK", token));
+//        } catch (NoSuchMessageException e) {
+//            return new ResponseEntity<>("Message not found", HttpStatus.NOT_FOUND);
+//        }
+//    }
 }
 // xoa lib thua, cmt
 //return response

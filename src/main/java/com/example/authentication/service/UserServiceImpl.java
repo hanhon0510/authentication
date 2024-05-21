@@ -1,19 +1,26 @@
 package com.example.authentication.service;
 
+import com.example.authentication.DTO.UserRegistrationDto;
+import com.example.authentication.DTO.UserSignInDto;
+import com.example.authentication.config.JwtProvider;
+import com.example.authentication.constant.ErrorCode;
+import com.example.authentication.exception.AppException;
 import com.example.authentication.repository.UserRepository;
 import com.example.authentication.model.User;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
+import com.example.authentication.response.AuthenticationResponse;
+import com.example.authentication.response.UserResponse;
+import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKey;
-import java.util.Base64;
-import java.util.Date;
+import java.util.Locale;
 
 @Service
 public class UserServiceImpl implements UserService {
 
+    @Autowired
+    private MessageSource messageSource;
     private UserRepository userRepository;
 
     public UserServiceImpl(UserRepository userRepository) {
@@ -22,17 +29,51 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public User createUser(String username, String password) {
+    public UserResponse createUser(UserRegistrationDto userRegistrationDto, Locale locale) {
+        String username = userRegistrationDto.getUsername();
+        String password = userRegistrationDto.getPassword();
+        String confirmedPassword = userRegistrationDto.getConfirmedPassword();
+
+        if (password.length() < 8) {
+            throw new AppException(400, messageSource.getMessage("shortPassword", null, locale));
+        }
+
+        if (!password.equals(confirmedPassword)) {
+            throw new AppException(400, messageSource.getMessage("passwordAndConfirmPasswordNotMatch", null, locale));
+        }
+
+        if (userRepository.findByUsername(username).isPresent()) {
+            throw new AppException(400, messageSource.getMessage("invalidInput", null, locale));
+        }
 
         User user = new User(username, password);
-
-        return userRepository.save(user);
+        userRepository.save(user);
+        return UserResponse.builder()
+                .username(username)
+                .build();
 
     }
 
     @Override
-    public User findUser(String username) {
-        System.out.println(username);
-        return userRepository.findByUsername(username);
+    public AuthenticationResponse login(UserSignInDto userSignInDto, Locale locale) {
+        String username = userSignInDto.getUsername();
+        String password = userSignInDto.getPassword();
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(()-> new AppException(400, messageSource.getMessage("invalidInput", null, locale)));
+        String dbPassword = user.getPassword();
+
+        boolean isPasswordMatch = BCrypt.checkpw(password, user.getPassword());
+
+        if (!isPasswordMatch) {
+            throw new AppException(400, messageSource.getMessage("invalidInput", null, locale));
+        }
+
+        String token = JwtProvider.generateToken(user);
+
+        return AuthenticationResponse.builder()
+                .token(token)
+                .type("jwt")
+                .build();
     }
 }
