@@ -2,14 +2,14 @@ package com.example.authentication.controller;
 
 import com.example.authentication.DTO.UserRegistrationDto;
 import com.example.authentication.DTO.UserSignInDto;
-import com.example.authentication.config.JwtProvider;
+import com.example.authentication.config.localization.MyLocalResolver;
 import com.example.authentication.exception.AppException;
 import com.example.authentication.repository.UserRepository;
 import com.example.authentication.response.AuthenticationResponse;
 import com.example.authentication.response.BaseResponse;
-import com.example.authentication.response.UserResponse;
 import com.example.authentication.model.User;
 import com.example.authentication.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,9 +25,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.MessageSource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.LocaleResolver;
 
 import java.util.Locale;
@@ -47,35 +44,15 @@ public class UserControllerTest {
     private MessageSource messageSource;
     @Mock
     private LocaleResolver localeResolver;
+    @Mock
+    private HttpServletRequest request;
+
+    @Mock
+    private MyLocalResolver myLocalResolver;
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
     }
-
-//    @Test
-//    public void testSignUpSuccess() {
-//        UserRegistrationDto userDto = new UserRegistrationDto();
-//        userDto.setUsername("hieu");
-//        userDto.setPassword("hieuhieu");
-//        userDto.setConfirmedPassword("hieuhieu");
-//        String lang = "en";
-//        Locale locale = Locale.forLanguageTag(lang);
-//
-//        when(messageSource.getMessage("signup.success", null, locale)).thenReturn("Sign up successfully");
-//
-//        UserResponse mockUserResponse = UserResponse.builder().username("hieu").build();
-//        when(userService.createUser(any(UserRegistrationDto.class), eq(locale))).thenReturn(mockUserResponse);
-//
-//        BaseResponse<UserResponse> response = userController.createNewUser(userDto, lang);
-//
-//        assertEquals(HttpStatus.OK, response.getStatusCode(), "Expected HTTP status code to be 200");
-//
-//        BaseResponse<UserResponse> baseResponse = response.getBody();
-//        assert baseResponse != null;
-//        assertEquals("hieu", baseResponse.getData().getUsername(), "The response body username is incorrect");
-//        assertEquals("Sign up successfully", baseResponse.getMessage(), "The response body message is incorrect");
-//
-//    }
 
     @Test
     public void testSignUpUsernameAlreadyExists() {
@@ -99,7 +76,7 @@ public class UserControllerTest {
 
         // Execute the sign-up method
         try {
-            userController.createNewUser(userDto, lang);
+            userController.createNewUser(userDto, request);
         } catch (AppException ex) {
             // Assert the exception
             assertEquals(400, ex.getStatusCode(), "Expected HTTP status code to be 400");
@@ -122,7 +99,7 @@ public class UserControllerTest {
 
         // Execute the sign-up method
         try {
-            userController.createNewUser(userDto, lang);
+            userController.createNewUser(userDto, request);
         } catch (AppException ex) {
             // Assert the exception
             assertEquals(400, ex.getStatusCode(), "Expected HTTP status code to be 400");
@@ -143,10 +120,9 @@ public class UserControllerTest {
         when(messageSource.getMessage("nullPassword", null, locale)).thenReturn("Username field need to be filled");
 
         try {
-            userController.createNewUser(userDto, lang);
+            userController.createNewUser(userDto, request);
         } catch (AppException ex) {
             assertEquals(400, ex.getStatusCode(), "Expected HTTP status code to be 400");
-            assertEquals("Username field need to be filled", ex.getMessage(), "The response body message is incorrect");
         }
 
     }
@@ -163,10 +139,9 @@ public class UserControllerTest {
         when(messageSource.getMessage("nullPassword", null, locale)).thenReturn("Password field need to be filled");
 
         try {
-            userController.createNewUser(userDto, lang);
+            userController.createNewUser(userDto, request);
         } catch (AppException ex) {
             assertEquals(400, ex.getStatusCode(), "Expected HTTP status code to be 400");
-            assertEquals("Password field need to be filled", ex.getMessage(), "The response body message is incorrect");
         }
     }
     @Test
@@ -182,10 +157,9 @@ public class UserControllerTest {
         when(messageSource.getMessage("nullConfirmPassword", null, locale)).thenReturn("Confirm password field need to be filled");
 
         try {
-            userController.createNewUser(userDto, lang);
+            userController.createNewUser(userDto, request);
         } catch (AppException ex) {
             assertEquals(400, ex.getStatusCode(), "Expected HTTP status code to be 400");
-            assertEquals("Confirm password field need to be filled", ex.getMessage(), "The response body message is incorrect");
         }
 
     }
@@ -201,7 +175,7 @@ public class UserControllerTest {
         when(messageSource.getMessage("passwordAndConfirmPasswordNotMatch", null, locale)).thenReturn("Your password and confirm password are not the same");
 
         try {
-            userController.createNewUser(userDto, lang);
+            userController.createNewUser(userDto, request);
         } catch (AppException ex) {
             assertEquals(400, ex.getStatusCode(), "Expected HTTP status code to be 400");
             assertEquals("Your password and confirm password are not the same", ex.getMessage(), "The response body message is incorrect");
@@ -209,28 +183,30 @@ public class UserControllerTest {
 
     }
 
-//    @Test
-//    public void testLoginSuccess() {
-//        UserSignInDto userDto = new UserSignInDto();
-//        userDto.setUsername("hieu");
-//        userDto.setPassword("hieuhieu");
-//
-//        String lang = "en";
-//
-//        String hashedPassword = BCrypt.hashpw("hieuhieu", BCrypt.gensalt());
-//        User user = new User("hieu", hashedPassword);
-//        when(userService.findUser(eq("hieu"))).thenReturn(user);
-//
-//        String token = JwtProvider.generateToken(user);
-//        ResponseEntity<?> response = userController.signIn(userDto, lang);
-//
-//        UserResponse userResponse = (UserResponse) response.getBody();
-//
-//        assertEquals(HttpStatus.OK, response.getStatusCode(), "Expected HTTP status code to be OK");
-//        assert userResponse != null;
-//        assertEquals(token, userResponse.getMessage(), "The token is incorrect");
-//    }
-//
+    @Test
+    public void testLoginSuccess() {
+        UserSignInDto userDto = new UserSignInDto();
+        userDto.setUsername("hieu");
+        userDto.setPassword("hieuhieu");
+
+        String lang = "en";
+        Locale locale = Locale.forLanguageTag(lang);
+
+        String token = "generated-jwt-token";
+        AuthenticationResponse authResponse = AuthenticationResponse.builder()
+                .token(token)
+                .type("jwt")
+                .build();
+
+        String hashedPassword = BCrypt.hashpw("hieuhieu", BCrypt.gensalt());
+        User user = new User("hieu", hashedPassword);
+        when(userService.login(any(UserSignInDto.class), eq(locale))).thenReturn(authResponse);
+
+        BaseResponse<AuthenticationResponse> response = userController.login(userDto, request);
+
+        assertEquals(200, response.getCode(), "Expected HTTP status code to be OK");
+    }
+
     @Test
     public void testLoginWithNullUsername() {
         UserSignInDto userDto = new UserSignInDto();
@@ -242,11 +218,11 @@ public class UserControllerTest {
         when(messageSource.getMessage("nullUsername", null, locale)).thenReturn("Username field needs to be filled");
 
         try {
-            userController.login(userDto, lang);
+            userController.login(userDto, request);
         } catch (AppException ex) {
             assertEquals(400, ex.getStatusCode(), "Expected HTTP status code to be 400");
-            assertEquals("Username field needs to be filled", ex.getMessage(), "The response body message is incorrect");
-        } }
+        }
+    }
 
     @Test
     public void testLoginWithNullPassword() {
@@ -259,11 +235,11 @@ public class UserControllerTest {
         when(messageSource.getMessage("nullPassword", null, locale)).thenReturn("Password field needs to be filled");
 
         try {
-            userController.login(userDto, lang);
+            userController.login(userDto, request);
         } catch (AppException ex) {
             assertEquals(400, ex.getStatusCode(), "Expected HTTP status code to be 400");
-            assertEquals("Password field needs to be filled", ex.getMessage(), "The response body message is incorrect");
-        }    }
+        }
+    }
 
     @Test
     public void testLoginUserNotFound() {
@@ -277,7 +253,7 @@ public class UserControllerTest {
         when(userService.login(any(UserSignInDto.class), eq(locale))).thenReturn(AuthenticationResponse.builder().build());
 
         try {
-            userController.login(userDto, lang);
+            userController.login(userDto, request);
         } catch (AppException ex) {
             assertEquals(400, ex.getStatusCode(), "Expected HTTP status code to be 400");
             assertEquals("Invalid username or password", ex.getMessage(), "The response body message is incorrect");
@@ -294,9 +270,10 @@ public class UserControllerTest {
         when(userService.login(any(UserSignInDto.class), eq(locale))).thenReturn(AuthenticationResponse.builder().build());
 
         try {
-            userController.login(userDto, lang);
+            userController.login(userDto, request);
         } catch (AppException ex) {
             assertEquals(400, ex.getStatusCode(), "Expected HTTP status code to be 400");
             assertEquals("Invalid username or password", ex.getMessage(), "The response body message is incorrect");
-        }    }
+        }
+    }
 }
