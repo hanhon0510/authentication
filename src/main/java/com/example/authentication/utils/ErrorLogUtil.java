@@ -16,9 +16,6 @@ public class ErrorLogUtil {
     @Autowired
     private ErrorLogRepository errorLogRepository;
     public void logError(Exception ex) {
-//        StringWriter sw = new StringWriter();
-//        PrintWriter pw = new PrintWriter(sw);
-//        ex.printStackTrace(pw);
         String s = Arrays.toString(ex.getStackTrace());
         ErrorLog errorLog = ErrorLog.builder()
                 .errMessage(ex.getMessage())
