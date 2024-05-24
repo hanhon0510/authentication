@@ -41,10 +41,25 @@ public class UserController {
             description = "Create a new account that does not exist yet.")
     @PostMapping("/signup")
     public BaseResponse<UserResponse> createNewUser(@RequestBody @Valid UserRegistrationDto userRegistrationDto,
-                                                    HttpServletRequest request) throws Exception {
-        throw new Exception("Test");
+                                                    HttpServletRequest request) {
+        
+       Locale locale = myLocalResolver.resolveLocale(request);
+        if (userRegistrationDto.getUsername() == null) {
+            throw new AppException(400, messageSource.getMessage("nullUsername", null, locale));
+        }
 
+        if (userRegistrationDto.getPassword() == null) {
+            throw new AppException(400, messageSource.getMessage("nullPassword", null, locale));
+        }
 
+        if (userRegistrationDto.getConfirmedPassword() == null) {
+            throw new AppException(400, messageSource.getMessage("nullConfirmPassword", null, locale));
+        }
+
+        return BaseResponse.<UserResponse>builder()
+                .message(messageSource.getMessage("signUpSuccess", null, locale))
+                .data(userService.createUser(userRegistrationDto, locale))
+                .build();
     }
 
     @Operation(summary = "Log in if existed")
