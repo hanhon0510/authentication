@@ -71,7 +71,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<BaseResponse> handleGenericException(Exception ex, HttpServletRequest request) {
 
         Locale locale = myLocalResolver.resolveLocale(request);
-        mailUtil.sendEmail(errorNotificationConfig.getEmail(), errorNotificationConfig.getSubject(), ex.getMessage());
+        //mailUtil.sendEmail(errorNotificationConfig.getEmail(), errorNotificationConfig.getSubject(), ex.getMessage());
 
         errorLogUtil.logError(ex);
 

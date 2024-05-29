@@ -25,7 +25,8 @@ public class ErrorLog {
     private String errMessage;
 
     @NotNull
-    @Column(name = "errStackTrace", columnDefinition = "LONGTEXT")
+//    @Column(name = "errStackTrace", columnDefinition = "LONGTEXT")
+    @Column(name = "errStackTrace", columnDefinition = "VARCHAR(MAX)")
     private String errStackTrace;
 
     @NotNull
