@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -24,19 +25,31 @@ public class SysLogServiceImpl implements SysLogService {
     @Override
     public List<SysLogResponse> filterSysLogsByMonthAndYear(SysLogRequest request) throws ParseException {
 
-        String startDateString = request.getStartDate() + "-01";
-        String endDateString = request.getEndDate() + "-01";
+        String startDateString = request.getStartDate();
+        String endDateString = request.getEndDate();
+
+        if (!isValidDate(startDateString) || !isValidDate(endDateString)) {
+            throw new AppException(400,"Invalid date format or month range");
+        }
+
+        startDateString += "-01";
+        endDateString += "-01";
 
         Date startDate = dateFormat.parse(startDateString);
-        Date endDate = dateFormat.parse(endDateString);
 
-        System.out.println(startDateString);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(dateFormat.parse(endDateString));
+        calendar.add(Calendar.MONTH, 1);
+        Date endDate = calendar.getTime();
 
         return sysLogRepository.getFilteredSysLog(
                 startDate,
                 endDate,
                 request.getMethod()
         );
-
+    }
+    private boolean isValidDate(String dateString) {
+        String datePattern = "^(\\d{4})-(0[1-9]|1[0-2])$";
+        return dateString.matches(datePattern);
     }
 }
