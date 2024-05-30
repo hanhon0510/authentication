@@ -24,8 +24,8 @@ public class SysLogServiceImpl implements SysLogService {
     @Override
     public List<SysLogResponse> filterSysLogsByMonthAndYear(SysLogRequest request) throws ParseException {
 
-        String startDateString = request.getStartYear() + "-" + String.format("%02d", request.getStartMonth()) + "-01";
-        String endDateString = request.getEndYear() + "-" + String.format("%02d", request.getEndMonth() + 1) + "-01";
+        String startDateString = request.getStartDate() + "-01";
+        String endDateString = request.getEndDate() + "-01";
 
         Date startDate = dateFormat.parse(startDateString);
         Date endDate = dateFormat.parse(endDateString);

@@ -12,16 +12,10 @@ import lombok.Setter;
 @NoArgsConstructor
 public class SysLogRequest {
     @NotNull
-    private int startMonth;
+    private String startDate;
 
     @NotNull
-    private int endMonth;
-
-    @NotNull
-    private int startYear;
-
-    @NotNull
-    private int endYear;
+    private String endDate;
 
     @NotNull
     private String method;
