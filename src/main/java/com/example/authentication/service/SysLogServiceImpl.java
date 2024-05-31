@@ -6,7 +6,6 @@ import com.example.authentication.repository.SysLogRepository;
 import com.example.authentication.request.SysLogDelRequest;
 import com.example.authentication.request.SysLogRequest;
 import com.example.authentication.response.SysLogDelResponse;
-import com.example.authentication.response.SysLogResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,8 +13,6 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-import java.util.logging.Logger;
 import java.text.SimpleDateFormat;
 @Service
 public class SysLogServiceImpl implements SysLogService {
@@ -67,6 +64,11 @@ public class SysLogServiceImpl implements SysLogService {
         return SysLogDelResponse.builder()
                 .count(count)
                 .build();
+    }
+
+    @Override
+    public List<SysLog> getSysLogs() {
+        return sysLogRepository.getSysLogs();
     }
 
     private boolean isValidDate(String dateString) {

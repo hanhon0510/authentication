@@ -37,6 +37,10 @@ public interface SysLogRepository extends JpaRepository<SysLog, Long> {
             @Param("method") String method
     );
 
+    @Query(value = "SELECT TOP (20) * " +
+            "FROM SysLogs s" , nativeQuery = true)
+    List<SysLog> getSysLogs();
+
     @Query(value = "SELECT count(*) " +
             "FROM SysLogs s " +
             "WHERE s.createdTime BETWEEN :startDate AND :endDate",

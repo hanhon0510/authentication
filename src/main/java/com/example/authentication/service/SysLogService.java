@@ -15,4 +15,6 @@ public interface SysLogService {
     List<Object[]> filterSysLogsByMonthAndYear(SysLogRequest request) throws ParseException;
 
     SysLogDelResponse deleteSysLogsFromArg1toArg2(SysLogDelRequest request) throws ParseException;
+
+    List<SysLog> getSysLogs();
 }

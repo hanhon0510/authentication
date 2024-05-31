@@ -138,4 +138,10 @@ public class SysLog {
 
     @Column(name = "UpdatedTime", nullable = false)
     private Date updatedTime;
+
+    public SysLog(String machineName, String authenticate) {
+        this.machineName = machineName;
+        this.method = authenticate;
+
+    }
 }
