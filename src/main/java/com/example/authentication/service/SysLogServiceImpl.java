@@ -23,7 +23,7 @@ public class SysLogServiceImpl implements SysLogService {
     private SysLogRepository sysLogRepository;
 
     @Override
-    public List<SysLogResponse> filterSysLogsByMonthAndYear(SysLogRequest request) throws ParseException {
+    public List<Object[]> filterSysLogsByMonthAndYear(SysLogRequest request) throws ParseException {
 
         String startDateString = request.getStartDate();
         String endDateString = request.getEndDate();

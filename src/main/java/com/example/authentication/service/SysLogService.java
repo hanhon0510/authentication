@@ -10,5 +10,5 @@ import java.util.Optional;
 
 public interface SysLogService {
 
-    List<SysLogResponse> filterSysLogsByMonthAndYear(SysLogRequest request) throws ParseException;
+    List<Object[]> filterSysLogsByMonthAndYear(SysLogRequest request) throws ParseException;
 }

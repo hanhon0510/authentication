@@ -21,9 +21,7 @@ public class SysLogController {
     private SysLogService sysLogService;
 
     @GetMapping("/syslogs")
-    public BaseResponse<List<SysLogResponse>> getFilteredSysLogs(@Valid @RequestBody SysLogRequest request) throws ParseException {
-        return BaseResponse.<List<SysLogResponse>>builder()
-                .data(sysLogService.filterSysLogsByMonthAndYear(request))
-                .build();
+    public List<Object[]> getFilteredSysLogs(@Valid @RequestBody SysLogRequest request) throws ParseException {
+        return sysLogService.filterSysLogsByMonthAndYear(request);
     }
 }
