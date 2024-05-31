@@ -3,7 +3,9 @@ package com.example.authentication.service;
 import com.example.authentication.exception.AppException;
 import com.example.authentication.model.SysLog;
 import com.example.authentication.repository.SysLogRepository;
+import com.example.authentication.request.SysLogDelRequest;
 import com.example.authentication.request.SysLogRequest;
+import com.example.authentication.response.SysLogDelResponse;
 import com.example.authentication.response.SysLogResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,6 +50,25 @@ public class SysLogServiceImpl implements SysLogService {
                 request.getMethod()
         );
     }
+
+    @Override
+    public SysLogDelResponse deleteSysLogsFromArg1toArg2(SysLogDelRequest request) throws ParseException {
+
+        String startDateString = request.getStartDate();
+        String endDateString = request.getEndDate();
+
+        Date startDate = dateFormat.parse(startDateString);
+        Date endDate = dateFormat.parse(endDateString);
+
+        Long count = sysLogRepository.countSysLogs(startDate, endDate);
+
+        sysLogRepository.deleteSysLogs(startDate, endDate);
+
+        return SysLogDelResponse.builder()
+                .count(count)
+                .build();
+    }
+
     private boolean isValidDate(String dateString) {
         String datePattern = "^(\\d{4})-(0[1-9]|1[0-2])$";
         return dateString.matches(datePattern);
