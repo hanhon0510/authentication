@@ -1,5 +1,6 @@
 package com.example.authentication.controller;
 
+import com.example.authentication.exception.AppException;
 import com.example.authentication.model.SysLog;
 import com.example.authentication.request.SysLogDelRequest;
 import com.example.authentication.request.SysLogRequest;
@@ -7,20 +8,21 @@ import com.example.authentication.response.BaseResponse;
 import com.example.authentication.response.SysLogDelResponse;
 import com.example.authentication.response.SysLogResponse;
 import com.example.authentication.service.CSVService;
+import com.example.authentication.service.PDFService;
 import com.example.authentication.service.SysLogService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -36,13 +38,18 @@ public class SysLogController {
     @Autowired
     private CSVService csvService;
 
+    @Autowired
+    private PDFService pdfService;
+
     @GetMapping("/syslogs")
     public List<Object[]> getFilteredSysLogs(@Valid @RequestBody SysLogRequest request) throws ParseException {
         return sysLogService.filterSysLogsByMonthAndYear(request);
     }
 
     @DeleteMapping("/delete/syslogs")
-    public BaseResponse<SysLogDelResponse> deleteSysLogs(@Valid @RequestBody SysLogDelRequest request) throws ParseException {
+    public BaseResponse<SysLogDelResponse> deleteSysLogs(@RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                                         @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) throws ParseException {
+        SysLogDelRequest request = new SysLogDelRequest(startDate, endDate);
         return BaseResponse.<SysLogDelResponse>builder()
                 .code(200)
                 .message("Deleted")
@@ -51,23 +58,24 @@ public class SysLogController {
     }
 
     @GetMapping("/export")
-    public ResponseEntity<String> exportCSV() {
-        List<SysLog> sysLogs = sysLogService.getSysLogs();
+    public void exportCSV(@RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                            @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+                                            @RequestParam("fileType") String fileType,
+                                            HttpServletResponse response) throws ParseException, IOException {
+        SysLogDelRequest request = new SysLogDelRequest(startDate, endDate);
+        List<SysLog> sysLogs = sysLogService.getSysLogs(request);
 
-        StringWriter writer = new StringWriter();
-        try {
-            csvService.writeSysLogsToCsv(writer, sysLogs);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (fileType.equalsIgnoreCase("csv")) {
+            response.setContentType("text/csv");
+            response.setHeader("Content-Disposition", "attachment; filename=\"syslogs.csv\"");
+            csvService.writeSysLogsToCsv(response.getWriter(), sysLogs);
+        } else if (fileType.equalsIgnoreCase("pdf")) {
+            response.setContentType("application/pdf");
+            response.setHeader("Content-Disposition", "attachment; filename=\"syslogs.pdf\"");
+            pdfService.writeSysLogsToPdf(response.getOutputStream(), sysLogs);
+        } else {
+            throw new AppException(400 ,"Not supported file type");
         }
 
-        String csvContent = writer.toString();
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=syslogs.csv");
-        headers.setContentType(MediaType.TEXT_PLAIN);
-
-        return ResponseEntity.ok()
-                .headers(headers)
-                .body(csvContent);
     }
 }

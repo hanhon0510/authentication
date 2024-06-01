@@ -16,5 +16,5 @@ public interface SysLogService {
 
     SysLogDelResponse deleteSysLogsFromArg1toArg2(SysLogDelRequest request) throws ParseException;
 
-    List<SysLog> getSysLogs();
+    List<SysLog> getSysLogs(SysLogDelRequest request) throws ParseException;
 }

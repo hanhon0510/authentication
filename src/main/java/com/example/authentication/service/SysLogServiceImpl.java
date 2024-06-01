@@ -49,17 +49,11 @@ public class SysLogServiceImpl implements SysLogService {
     }
 
     @Override
-    public SysLogDelResponse deleteSysLogsFromArg1toArg2(SysLogDelRequest request) throws ParseException {
+    public SysLogDelResponse deleteSysLogsFromArg1toArg2(SysLogDelRequest request) {
 
-        String startDateString = request.getStartDate();
-        String endDateString = request.getEndDate();
+        Long count = sysLogRepository.countSysLogs(request.getStartDate(), request.getEndDate());
 
-        Date startDate = dateFormat.parse(startDateString);
-        Date endDate = dateFormat.parse(endDateString);
-
-        Long count = sysLogRepository.countSysLogs(startDate, endDate);
-
-        sysLogRepository.deleteSysLogs(startDate, endDate);
+        sysLogRepository.deleteSysLogs(request.getStartDate(), request.getEndDate());
 
         return SysLogDelResponse.builder()
                 .count(count)
@@ -67,8 +61,9 @@ public class SysLogServiceImpl implements SysLogService {
     }
 
     @Override
-    public List<SysLog> getSysLogs() {
-        return sysLogRepository.getSysLogs();
+    public List<SysLog> getSysLogs(SysLogDelRequest request) {
+
+        return sysLogRepository.getSysLogs(request.getStartDate(), request.getEndDate());
     }
 
     private boolean isValidDate(String dateString) {

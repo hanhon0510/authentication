@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -38,16 +39,19 @@ public interface SysLogRepository extends JpaRepository<SysLog, Long> {
     );
 
     @Query(value = "SELECT TOP (20) * " +
-            "FROM SysLogs s" , nativeQuery = true)
-    List<SysLog> getSysLogs();
+                "FROM SysLogs s " +
+                "WHERE s.createdTime BETWEEN :startDate AND :endDate",
+            nativeQuery = true)
+    List<SysLog> getSysLogs(@Param("startDate") LocalDate startDate,
+                            @Param("endDate") LocalDate endDate);
 
     @Query(value = "SELECT count(*) " +
-            "FROM SysLogs s " +
-            "WHERE s.createdTime BETWEEN :startDate AND :endDate",
+                "FROM SysLogs s " +
+                "WHERE s.createdTime BETWEEN :startDate AND :endDate",
             nativeQuery = true)
     Long countSysLogs(
-            @Param("startDate") Date startDate,
-            @Param("endDate") Date endDate);
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
 
     @Modifying
     @Transactional
@@ -56,6 +60,6 @@ public interface SysLogRepository extends JpaRepository<SysLog, Long> {
             "WHERE s.createdTime BETWEEN :startDate AND :endDate",
         nativeQuery = true)
     void deleteSysLogs(
-            @Param("startDate") Date startDate,
-            @Param("endDate") Date endDate);
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
 }
