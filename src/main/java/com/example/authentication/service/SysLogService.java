@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public interface SysLogService {
 
-    List<Object[]> filterSysLogsByMonthAndYear(SysLogRequest request) throws ParseException;
+    List<SysLogResponse> filterSysLogsByMonthAndYear(SysLogRequest request) throws ParseException;
 
     SysLogDelResponse deleteSysLogsFromArg1toArg2(SysLogDelRequest request) throws ParseException;
 

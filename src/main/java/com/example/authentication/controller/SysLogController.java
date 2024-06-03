@@ -42,7 +42,7 @@ public class SysLogController {
     private PDFService pdfService;
 
     @GetMapping("/syslogs")
-    public List<Object[]> getFilteredSysLogs(@Valid @RequestBody SysLogRequest request) throws ParseException {
+    public List<SysLogResponse> getFilteredSysLogs(@Valid @RequestBody SysLogRequest request) throws ParseException {
         return sysLogService.filterSysLogsByMonthAndYear(request);
     }
 

@@ -10,7 +10,7 @@ import java.io.Writer;
 import java.util.List;
 
 @Service
-public class CSVServiceImpl implements CSVService{
+public class CSVServiceImpl implements CSVService {
 
     public void writeSysLogsToCsv(Writer writer, List<SysLog> sysLogs) throws IOException {
         try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader("CreatedTime", "SysLogId", "method"))) {

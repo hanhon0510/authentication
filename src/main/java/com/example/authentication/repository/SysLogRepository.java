@@ -1,6 +1,7 @@
 package com.example.authentication.repository;
 
 import com.example.authentication.model.SysLog;
+import com.example.authentication.response.SysLogResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Repository
 public interface SysLogRepository extends JpaRepository<SysLog, Long> {
+
     @Query(value = "WITH MonthSeries AS ( " +
                     "    SELECT FORMAT(CAST(:startDate AS DATE), 'yyyy/MM') AS yearMonth " +
                     "    UNION ALL " +
@@ -21,7 +23,7 @@ public interface SysLogRepository extends JpaRepository<SysLog, Long> {
                     "    FROM MonthSeries " +
                     "    WHERE DATEADD(MONTH, 1, CAST(yearMonth + '/01' AS DATE)) <= :endDate " +
                     ") " +
-                    "SELECT ms.yearMonth, " +
+                    "SELECT ms.yearMonth AS yearMonth, " +
                     "CASE WHEN COUNT(*) = 1 THEN NULL ELSE COUNT(*) END AS count " +
                     "FROM MonthSeries ms " +
                     "LEFT JOIN SysLogs s ON FORMAT(s.createdTime, 'yyyy/MM') = ms.yearMonth " +

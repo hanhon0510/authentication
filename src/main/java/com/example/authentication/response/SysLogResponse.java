@@ -1,5 +1,6 @@
 package com.example.authentication.response;
 
+import jakarta.persistence.*;
 import lombok.*;
 
 @Getter
@@ -8,5 +9,5 @@ import lombok.*;
 @NoArgsConstructor
 public class SysLogResponse {
     private String yearMonth;
-    private Long count;
+    private Integer count;
 }

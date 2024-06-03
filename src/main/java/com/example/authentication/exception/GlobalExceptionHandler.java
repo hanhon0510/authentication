@@ -73,12 +73,13 @@ public class GlobalExceptionHandler {
         Locale locale = myLocalResolver.resolveLocale(request);
         //mailUtil.sendEmail(errorNotificationConfig.getEmail(), errorNotificationConfig.getSubject(), ex.getMessage());
 
-        errorLogUtil.logError(ex);
+//        errorLogUtil.logError(ex);
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                 BaseResponse.builder()
                         .code(HttpStatus.BAD_REQUEST.value())
-                        .message(messageSource.getMessage("generalException", null, locale))
+//                        .message(messageSource.getMessage("generalException", null, locale))
+                        .message(ex.getMessage())
                         .timestamp(LocalDateTime.now())
                         .build()
         );
