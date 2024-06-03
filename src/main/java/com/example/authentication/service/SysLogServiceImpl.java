@@ -44,17 +44,8 @@ public class SysLogServiceImpl implements SysLogService {
         calendar.add(Calendar.MONTH, 1);
         Date endDate = calendar.getTime();
 
-        List<Object[]> rawData = sysLogRepository.getFilteredSysLog(startDate, endDate, request.getMethod());
+        return sysLogRepository.getFilteredSysLog(startDate, endDate, request.getMethod());
 
-        return rawData.stream()
-                .map(this::convertToSysLogResponse)
-                .collect(Collectors.toList());
-    }
-    private SysLogResponse convertToSysLogResponse(Object[] rawData) {
-        SysLogResponse response = new SysLogResponse();
-        response.setYearMonth((String) rawData[0]);
-        response.setCount(rawData[1] != null ? (Integer) rawData[1] : null);
-        return response;
     }
 
     @Override

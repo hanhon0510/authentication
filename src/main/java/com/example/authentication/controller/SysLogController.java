@@ -61,7 +61,7 @@ public class SysLogController {
     public ResponseEntity<?> export(@RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
                                             @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
                                             @RequestParam("fileType") String fileType
-                                            ) throws ParseException, IOException {
+                                            ) throws ParseException {
         SysLogDelRequest request = new SysLogDelRequest(startDate, endDate);
         List<SysLog> sysLogs = sysLogService.getSysLogs(request);
 

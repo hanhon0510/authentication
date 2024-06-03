@@ -1,6 +1,7 @@
 package com.example.authentication.model;
 
 
+import com.example.authentication.response.SysLogResponse;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,6 +16,37 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@SqlResultSetMapping(
+        name = "SysLogResponseMapping",
+        classes = @ConstructorResult(
+                targetClass = SysLogResponse.class,
+                columns = {
+                        @ColumnResult(name = "yearMonth", type = String.class),
+                        @ColumnResult(name = "count", type = Integer.class)
+                }
+        )
+)
+@NamedNativeQuery(
+        name = "SysLog.getFilteredSysLog",
+        query = "WITH MonthSeries AS ( " +
+                "    SELECT FORMAT(CAST(:startDate AS DATE), 'yyyy/MM') AS yearMonth " +
+                "    UNION ALL " +
+                "    SELECT FORMAT(DATEADD(MONTH, 1, CAST(yearMonth + '/01' AS DATE)), 'yyyy/MM') " +
+                "    FROM MonthSeries " +
+                "    WHERE DATEADD(MONTH, 1, CAST(yearMonth + '/01' AS DATE)) <= :endDate " +
+                ") " +
+                "SELECT ms.yearMonth AS yearMonth, " +
+                "CASE WHEN COUNT(*) = 1 THEN NULL ELSE COUNT(*) END AS count " +
+                "FROM MonthSeries ms " +
+                "LEFT JOIN SysLogs s ON FORMAT(s.createdTime, 'yyyy/MM') = ms.yearMonth " +
+                "AND s.createdTime >= :startDate " +
+                "AND s.createdTime < :endDate " +
+                "AND s.method = :method " +
+                "GROUP BY ms.yearMonth " +
+                "ORDER BY ms.yearMonth " +
+                "OPTION (MAXRECURSION 0)",
+        resultSetMapping = "SysLogResponseMapping"
+)
 @Table(name = "SysLogs")
 public class SysLog {
     @Id
