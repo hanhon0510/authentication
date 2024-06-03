@@ -13,14 +13,14 @@ import com.example.authentication.service.SysLogService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -58,21 +58,42 @@ public class SysLogController {
     }
 
     @GetMapping("/export")
-    public void exportCSV(@RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+    public ResponseEntity<?> export(@RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
                                             @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-                                            @RequestParam("fileType") String fileType,
-                                            HttpServletResponse response) throws ParseException, IOException {
+                                            @RequestParam("fileType") String fileType
+                                            ) throws ParseException, IOException {
         SysLogDelRequest request = new SysLogDelRequest(startDate, endDate);
         List<SysLog> sysLogs = sysLogService.getSysLogs(request);
 
         if (fileType.equalsIgnoreCase("csv")) {
-            response.setContentType("text/csv");
-            response.setHeader("Content-Disposition", "attachment; filename=\"syslogs.csv\"");
-            csvService.writeSysLogsToCsv(response.getWriter(), sysLogs);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            try (Writer writer = new OutputStreamWriter(outputStream)) {
+                csvService.writeSysLogsToCsv(writer, sysLogs);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            byte[] csvContent = outputStream.toByteArray();
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=syslogs.csv");
+            headers.setContentType(MediaType.parseMediaType("text/csv"));
+            headers.setContentLength(csvContent.length);
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(new ByteArrayResource(csvContent));
         } else if (fileType.equalsIgnoreCase("pdf")) {
-            response.setContentType("application/pdf");
-            response.setHeader("Content-Disposition", "attachment; filename=\"syslogs.pdf\"");
-            pdfService.writeSysLogsToPdf(response.getOutputStream(), sysLogs);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            pdfService.writeSysLogsToPdf(outputStream, sysLogs);
+
+            byte[] pdfContent = outputStream.toByteArray();
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=syslogs.pdf");
+            headers.setContentType(MediaType.APPLICATION_PDF);
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfContent);
         } else {
             throw new AppException(400 ,"Not supported file type");
         }
