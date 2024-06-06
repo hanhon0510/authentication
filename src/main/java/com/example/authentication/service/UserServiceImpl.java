@@ -48,8 +48,9 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findByUsername(username).isPresent()) {
             throw new AppException(400, messageSource.getMessage("invalidInput", null, locale));
         }
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
-        User user = new User(username, password);
+        User user = new User(username, hashedPassword);
         userRepository.save(user);
         return UserResponse.builder()
                 .username(username)

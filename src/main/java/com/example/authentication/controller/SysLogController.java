@@ -41,7 +41,7 @@ public class SysLogController {
     @Autowired
     private PDFService pdfService;
 
-    @GetMapping("/syslogs")
+    @PostMapping("/syslogs")
     public List<SysLogResponse> getFilteredSysLogs(@Valid @RequestBody SysLogRequest request) throws ParseException {
         return sysLogService.filterSysLogsByMonthAndYear(request);
     }
@@ -57,7 +57,7 @@ public class SysLogController {
                 .build();
     }
 
-    @GetMapping("/export")
+    @PostMapping("/export")
     public ResponseEntity<?> export(@RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
                                             @RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
                                             @RequestParam("fileType") String fileType
@@ -77,11 +77,11 @@ public class SysLogController {
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=syslogs.csv");
             headers.setContentType(MediaType.parseMediaType("text/csv"));
-            headers.setContentLength(csvContent.length);
+//            headers.setContentLength(csvContent.length);
 
             return ResponseEntity.ok()
                     .headers(headers)
-                    .body(new ByteArrayResource(csvContent));
+                    .body(csvContent);
         } else if (fileType.equalsIgnoreCase("pdf")) {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             pdfService.writeSysLogsToPdf(outputStream, sysLogs);
