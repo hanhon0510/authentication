@@ -19,4 +19,5 @@ public class JwtProvider {
                 .signWith(SECRET_KEY)
                 .compact();
     }
+
 }

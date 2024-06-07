@@ -1,15 +1,15 @@
 package com.example.authentication.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class AuthenticationResponse {
+    private long expiresIn;
     private String token;
     private String type;
 }

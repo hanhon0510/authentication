@@ -2,8 +2,10 @@ package com.example.authentication.controller;
 
 import com.example.authentication.DTO.UserRegistrationDto;
 import com.example.authentication.DTO.UserSignInDto;
+import com.example.authentication.config.Jwt.JwtService;
 import com.example.authentication.config.localization.MyLocalResolver;
 import com.example.authentication.exception.AppException;
+import com.example.authentication.model.User;
 import com.example.authentication.response.AuthenticationResponse;
 import com.example.authentication.response.BaseResponse;
 import com.example.authentication.response.UserResponse;
@@ -15,12 +17,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.LocaleResolver;
 
 import java.util.Locale;
 
 @RestController
+@RequestMapping("/auth")
 public class UserController {
 
     @Autowired
@@ -29,12 +34,15 @@ public class UserController {
     @Autowired
     private LocaleResolver localeResolver;
 
+    private final JwtService jwtService;
+
     @Autowired
     MyLocalResolver myLocalResolver;
 
     private UserService userService;
 
-    public UserController(UserService userService) {
+    public UserController(JwtService jwtService , UserService userService) {
+        this.jwtService = jwtService;
         this.userService = userService;
     }
     @Operation(summary = "Create new user",
@@ -82,10 +90,17 @@ public class UserController {
             throw new AppException(400, messageSource.getMessage("nullPassword", null, locale));
         }
 
+        User authenticatedUser = userService.login(userSignInDto, locale);
+
+        String jwtToken = jwtService.generateToken(authenticatedUser);
+
+        AuthenticationResponse loginResponse = new AuthenticationResponse();
+        loginResponse.setToken(jwtToken);
+        loginResponse.setExpiresIn(jwtService.getExpirationTime());
         return BaseResponse.<AuthenticationResponse>builder()
                 .code(200)
                 .message(messageSource.getMessage("loginSuccess", null, locale))
-                .data(userService.login(userSignInDto, locale))
+                .data(loginResponse)
                 .build();
     }
 }

@@ -7,13 +7,14 @@ import com.example.authentication.model.User;
 import com.example.authentication.response.AuthenticationResponse;
 import com.example.authentication.response.UserResponse;
 
+import java.util.List;
 import java.util.Locale;
 
 public interface UserService {
 
     public UserResponse createUser(UserRegistrationDto userRegistrationDto, Locale locale);
 
-//    User findUser(String username);
+    User login(UserSignInDto userSignInDto, Locale locale);
 
-    AuthenticationResponse login(UserSignInDto userSignInDto, Locale locale);
+    public List<User> allUsers();
 }

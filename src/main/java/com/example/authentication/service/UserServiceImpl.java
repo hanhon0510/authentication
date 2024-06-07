@@ -12,8 +12,13 @@ import com.example.authentication.response.UserResponse;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 @Service
@@ -24,10 +29,15 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     private ErrorLogRepository errorLogRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, ErrorLogRepository errorLogRepository) {
+    private final AuthenticationManager authenticationManager;
+
+    public UserServiceImpl(UserRepository userRepository, ErrorLogRepository errorLogRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.errorLogRepository = errorLogRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
     }
 
 
@@ -48,7 +58,7 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findByUsername(username).isPresent()) {
             throw new AppException(400, messageSource.getMessage("invalidInput", null, locale));
         }
-        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+        String hashedPassword = passwordEncoder.encode(password);
 
         User user = new User(username, hashedPassword);
         userRepository.save(user);
@@ -59,7 +69,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public AuthenticationResponse login(UserSignInDto userSignInDto, Locale locale) {
+    public User login(UserSignInDto userSignInDto, Locale locale) {
         String username = userSignInDto.getUsername();
         String password = userSignInDto.getPassword();
 
@@ -74,9 +84,19 @@ public class UserServiceImpl implements UserService {
 
         String token = JwtProvider.generateToken(user);
 
-        return AuthenticationResponse.builder()
-                .token(token)
-                .type("jwt")
-                .build();
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        username,
+                        password
+                )
+        );
+
+        return userRepository.findByUsername(username)
+                .orElseThrow();
     }
+    public List<User> allUsers() {
+
+        return new ArrayList<>(userRepository.findAll());
+    }
+
 }
