@@ -9,6 +9,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class AuthenticationResponse {
+    private String username;
     private long expiresIn;
     private String token;
     private String type;

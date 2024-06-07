@@ -97,6 +97,8 @@ public class UserController {
         AuthenticationResponse loginResponse = new AuthenticationResponse();
         loginResponse.setToken(jwtToken);
         loginResponse.setExpiresIn(jwtService.getExpirationTime());
+        loginResponse.setType("jwt");
+        loginResponse.setUsername(authenticatedUser.getUsername());
         return BaseResponse.<AuthenticationResponse>builder()
                 .code(200)
                 .message(messageSource.getMessage("loginSuccess", null, locale))

@@ -2,12 +2,10 @@ package com.example.authentication.service;
 
 import com.example.authentication.DTO.UserRegistrationDto;
 import com.example.authentication.DTO.UserSignInDto;
-import com.example.authentication.config.JwtProvider;
 import com.example.authentication.exception.AppException;
 import com.example.authentication.repository.ErrorLogRepository;
 import com.example.authentication.repository.UserRepository;
 import com.example.authentication.model.User;
-import com.example.authentication.response.AuthenticationResponse;
 import com.example.authentication.response.UserResponse;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,8 +79,6 @@ public class UserServiceImpl implements UserService {
         if (!isPasswordMatch) {
             throw new AppException(400, messageSource.getMessage("invalidInput", null, locale));
         }
-
-        String token = JwtProvider.generateToken(user);
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
