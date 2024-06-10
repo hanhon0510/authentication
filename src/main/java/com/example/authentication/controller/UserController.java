@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -90,20 +91,21 @@ public class UserController {
             throw new AppException(400, messageSource.getMessage("nullPassword", null, locale));
         }
 
-        User authenticatedUser = userService.login(userSignInDto, locale);
-
-        String jwtToken = jwtService.generateToken(authenticatedUser);
-
-        AuthenticationResponse loginResponse = new AuthenticationResponse();
-        loginResponse.setToken(jwtToken);
-        loginResponse.setExpiresIn(jwtService.getExpirationTime());
-        loginResponse.setType("jwt");
-        loginResponse.setUsername(authenticatedUser.getUsername());
         return BaseResponse.<AuthenticationResponse>builder()
                 .code(200)
                 .message(messageSource.getMessage("loginSuccess", null, locale))
-                .data(loginResponse)
+                .data(userService.login(userSignInDto, locale))
                 .build();
     }
+
+    @PostMapping("refresh-token")
+    public BaseResponse<AuthenticationResponse> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        return BaseResponse.<AuthenticationResponse>builder()
+                .code(200)
+                .message("Refresh successfully")
+                .data(userService.refreshToken(request, response))
+                .build();
+    }
+
 }
 

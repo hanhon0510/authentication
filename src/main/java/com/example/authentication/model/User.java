@@ -35,6 +35,9 @@ public class User implements UserDetails {
     @Column(name = "language")
     private String language;
 
+    @OneToMany(mappedBy = "user")
+    private List<Token> tokens;
+
     public User(){}
 
     public User(String username, String password) {

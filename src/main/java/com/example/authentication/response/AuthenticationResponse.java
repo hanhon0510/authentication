@@ -1,5 +1,6 @@
 package com.example.authentication.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 @Data
@@ -10,7 +11,10 @@ import lombok.*;
 @Builder
 public class AuthenticationResponse {
     private String username;
-    private long expiresIn;
-    private String token;
-    private String type;
+
+    @JsonProperty("access_token")
+    private String accessToken;
+
+    @JsonProperty("refresh_token")
+    private String refreshToken;
 }
