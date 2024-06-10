@@ -5,6 +5,7 @@ import com.example.authentication.request.SysLogDelRequest;
 import com.example.authentication.request.SysLogRequest;
 import com.example.authentication.response.SysLogDelResponse;
 import com.example.authentication.response.SysLogResponse;
+import org.springframework.data.domain.Page;
 
 import java.text.ParseException;
 import java.util.List;
@@ -17,4 +18,5 @@ public interface SysLogService {
     SysLogDelResponse deleteSysLogsFromArg1toArg2(SysLogDelRequest request) throws ParseException;
 
     List<SysLog> getSysLogs(SysLogDelRequest request) throws ParseException;
+    Page<SysLog> getAllSysLogs(int pageNumber, int pageSize);
 }

@@ -79,7 +79,7 @@ public class SysLog {
     private String application;
 
     @Column(name = "Class")
-    private String clazz;
+    private String sys_class;
 
     @Column(name = "Method")
     private String method;

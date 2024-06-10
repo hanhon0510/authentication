@@ -8,6 +8,9 @@ import com.example.authentication.request.SysLogRequest;
 import com.example.authentication.response.SysLogDelResponse;
 import com.example.authentication.response.SysLogResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
@@ -64,6 +67,12 @@ public class SysLogServiceImpl implements SysLogService {
     public List<SysLog> getSysLogs(SysLogDelRequest request) {
 
         return sysLogRepository.getSysLogs(request.getStartDate(), request.getEndDate());
+    }
+
+    @Override
+    public Page<SysLog> getAllSysLogs(int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        return sysLogRepository.findAll(pageable);
     }
 
     private boolean isValidDate(String dateString) {
