@@ -14,8 +14,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,6 +46,12 @@ public class SysLogController {
     @PostMapping("/syslogs")
     public List<SysLogResponse> getFilteredSysLogs(@Valid @RequestBody SysLogRequest request) throws ParseException {
         return sysLogService.filterSysLogsByMonthAndYear(request);
+    }
+
+    @PostMapping("/get/syslogs")
+    public ResponseEntity<Page<SysLog>> getSyslogs(@RequestParam int pageNumber,
+                                                   @RequestParam int pageSize) {
+        return new ResponseEntity<>(sysLogService.getAllSysLogs(pageNumber, pageSize), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/syslogs")
