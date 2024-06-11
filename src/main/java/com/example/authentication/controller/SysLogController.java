@@ -2,6 +2,7 @@ package com.example.authentication.controller;
 
 import com.example.authentication.exception.AppException;
 import com.example.authentication.model.SysLog;
+import com.example.authentication.request.FilterSysLogRequest;
 import com.example.authentication.request.SysLogDelRequest;
 import com.example.authentication.request.SysLogRequest;
 import com.example.authentication.response.BaseResponse;
@@ -44,7 +45,7 @@ public class SysLogController {
     private PDFService pdfService;
 
     @PostMapping("/syslogs")
-    public List<SysLogResponse> getFilteredSysLogs(@Valid @RequestBody SysLogRequest request) throws ParseException {
+    public List<SysLogResponse> getCountSysLogs(@Valid @RequestBody SysLogRequest request) throws ParseException {
         return sysLogService.filterSysLogsByMonthAndYear(request);
     }
 
@@ -52,6 +53,13 @@ public class SysLogController {
     public ResponseEntity<Page<SysLog>> getSyslogs(@RequestParam int pageNumber,
                                                    @RequestParam int pageSize) {
         return new ResponseEntity<>(sysLogService.getAllSysLogs(pageNumber, pageSize), HttpStatus.OK);
+    }
+
+    @PostMapping("/filter/syslogs")
+    public ResponseEntity<List<SysLog>> getFilteredSyslogs(@RequestParam int pageNumber,
+                                                           @RequestParam int pageSize,
+                                                           @Valid @RequestBody FilterSysLogRequest request) throws ParseException {
+        return new ResponseEntity<>(sysLogService.getFilterSysLogs(pageNumber, pageSize, request), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete/syslogs")

@@ -143,7 +143,7 @@ public class UserServiceImpl implements UserService {
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new AppException(400, "Unauthorized");
+            throw new AppException(403, "Forbidden");
         }
 
         String token = authHeader.substring(7);
@@ -162,7 +162,7 @@ public class UserServiceImpl implements UserService {
 
             return new AuthenticationResponse(username, accessToken, refreshToken);
         }
-        throw new AppException(400, "Unauthorized");
+        throw new AppException(403, "Forbidden ");
 
     }
 

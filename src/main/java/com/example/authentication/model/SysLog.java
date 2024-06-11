@@ -27,7 +27,7 @@ import java.util.Date;
         )
 )
 @NamedNativeQuery(
-        name = "SysLog.getFilteredSysLog",
+        name = "SysLog.getFilteredSysLogByMonthAndYear",
         query = "WITH MonthSeries AS ( " +
                 "    SELECT FORMAT(CAST(:startDate AS DATE), 'yyyy/MM') AS yearMonth " +
                 "    UNION ALL " +
@@ -41,7 +41,7 @@ import java.util.Date;
                 "LEFT JOIN SysLogs s ON FORMAT(s.createdTime, 'yyyy/MM') = ms.yearMonth " +
                 "AND s.createdTime >= :startDate " +
                 "AND s.createdTime < :endDate " +
-                "AND s.method = :method " +
+                "AND (:method is null or s.method = :method )  " +
                 "GROUP BY ms.yearMonth " +
                 "ORDER BY ms.yearMonth " +
                 "OPTION (MAXRECURSION 0)",
@@ -79,7 +79,7 @@ public class SysLog {
     private String application;
 
     @Column(name = "Class")
-    private String sys_class;
+    private String appClass;
 
     @Column(name = "Method")
     private String method;
