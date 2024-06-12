@@ -6,6 +6,7 @@ import com.example.authentication.request.FilterSysLogRequest;
 import com.example.authentication.request.SysLogDelRequest;
 import com.example.authentication.request.SysLogRequest;
 import com.example.authentication.response.BaseResponse;
+import com.example.authentication.response.FilterSysLogByCategoriesResponse;
 import com.example.authentication.response.SysLogDelResponse;
 import com.example.authentication.response.SysLogResponse;
 import com.example.authentication.service.CSVService;
@@ -56,9 +57,9 @@ public class SysLogController {
     }
 
     @PostMapping("/filter/syslogs")
-    public ResponseEntity<List<SysLog>> getFilteredSyslogs(@RequestParam int pageNumber,
-                                                           @RequestParam int pageSize,
-                                                           @Valid @RequestBody FilterSysLogRequest request) throws ParseException {
+    public ResponseEntity<FilterSysLogByCategoriesResponse> getFilteredSyslogs(@RequestParam int pageNumber,
+                                                                               @RequestParam int pageSize,
+                                                                               @Valid @RequestBody FilterSysLogRequest request) throws ParseException {
         return new ResponseEntity<>(sysLogService.getFilterSysLogs(pageNumber, pageSize, request), HttpStatus.OK);
     }
 

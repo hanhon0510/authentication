@@ -6,6 +6,7 @@ import com.example.authentication.repository.SysLogRepository;
 import com.example.authentication.request.FilterSysLogRequest;
 import com.example.authentication.request.SysLogDelRequest;
 import com.example.authentication.request.SysLogRequest;
+import com.example.authentication.response.FilterSysLogByCategoriesResponse;
 import com.example.authentication.response.SysLogDelResponse;
 import com.example.authentication.response.SysLogResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -83,36 +84,7 @@ public class SysLogServiceImpl implements SysLogService {
     }
 
     @Override
-    public List<SysLog> getFilterSysLogs(int pageNumber, int pageSize, FilterSysLogRequest request) throws ParseException {
-//        Pageable pageable = PageRequest.of(pageNumber, pageSize);
-//
-//        String startDateString = request.getStartDate();
-//        String endDateString = request.getEndDate();
-
-//        if (!isValidDate(startDateString) || !isValidDate(endDateString)) {
-//            throw new AppException(400,"Invalid date format or month range");
-//        }
-//
-//        Date startDate = dateFormat.parse(startDateString);
-//
-//        Calendar calendar = Calendar.getInstance();
-//        calendar.setTime(dateFormat.parse(endDateString));
-//        calendar.add(Calendar.MONTH, 1);
-//        Date endDate = calendar.getTime();
-
-//        List<SysLog> sysLogs = sysLogRepository.getFilterSysLogs(startDate, endDate,
-//                request.getHttpMethod().isEmpty() ? Optional.empty() : Optional.of(request.getHttpMethod()),
-//                request.getMethod().isEmpty() ? Optional.empty() : Optional.of(request.getMethod()),
-//                request.getAppClass().isEmpty() ? Optional.empty() : Optional.of(request.getAppClass()));
-//        int startIndex = (int) pageable.getOffset();
-//        int endIndex = Math.min(startIndex + pageable.getPageSize(), sysLogs.size());
-//
-//        List<SysLog> pageContent = sysLogs.subList(startIndex, endIndex);
-//
-//        Page<SysLog> filterSysLogs = new PageImpl<>(pageContent, pageable, sysLogs.size());
-
-//        return filterSysLogs;
-//        return null;
+    public FilterSysLogByCategoriesResponse getFilterSysLogs(int pageNumber, int pageSize, FilterSysLogRequest request) throws ParseException {
 
         if(request.getMethod() == null || request.getMethod().isEmpty()) {
             request.setMethod(null);
@@ -125,13 +97,24 @@ public class SysLogServiceImpl implements SysLogService {
         }
 
         int offset = (pageNumber - 1) * pageSize;
-        return sysLogRepository.findSysLogsByCategories(request.getStartDate(),
+
+        long totalLogs = sysLogRepository.countSysLogsByCategories(
+                request.getStartDate(),
+                request.getEndDate(),
+                request.getAppClass(),
+                request.getMethod(),
+                request.getHttpMethod()
+        );
+        int totalPages = (int) Math.ceil((double) totalLogs / pageSize);
+
+        List<SysLog> sysLogs =  sysLogRepository.findSysLogsByCategories(request.getStartDate(),
                                                         request.getEndDate(),
                                                         request.getAppClass(),
                                                         request.getMethod(),
                                                         request.getHttpMethod(),
                                                         offset,
                                                         pageSize);
+        return new FilterSysLogByCategoriesResponse(sysLogs, totalPages);
     }
 
 

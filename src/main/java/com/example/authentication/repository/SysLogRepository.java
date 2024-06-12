@@ -70,4 +70,17 @@ public interface SysLogRepository extends JpaRepository<SysLog, Long> {
             @Param("offset") int offset,
             @Param("pageSize") int pageSize
     );
+    @Query(value = "SELECT COUNT(*) FROM SysLogs s WHERE " +
+            "(s.createdTime BETWEEN :startDate AND :endDate) AND " +
+            "(:className IS NULL OR s.class = :className) AND " +
+            "(:method IS NULL OR s.method = :method) AND " +
+            "(:httpMethod IS NULL OR s.httpMethod = :httpMethod)",
+            nativeQuery = true)
+    long countSysLogsByCategories(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("className") String className,
+            @Param("method") String methodName,
+            @Param("httpMethod") String httpMethod
+    );
 }
