@@ -38,7 +38,7 @@ public class SysLogServiceImpl implements SysLogService {
         String endDateString = request.getEndDate();
 
         if (!isValidDate(startDateString) || !isValidDate(endDateString)) {
-            throw new AppException(400,"Invalid date format or month range");
+            throw new AppException(400, "Invalid date format or month range");
         }
 
         startDateString += "-01";
@@ -49,15 +49,18 @@ public class SysLogServiceImpl implements SysLogService {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(dateFormat.parse(endDateString));
         calendar.add(Calendar.MONTH, 1);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.add(Calendar.DATE, -1);
         Date endDate = calendar.getTime();
 
-        if(request.getMethod() == null || request.getMethod().isEmpty()) {
-            request.setMethod(null);
+        String method = request.getMethod();
+        if (method != null && method.isEmpty()) {
+            method = null;
         }
 
-        return sysLogRepository.getFilteredSysLogByMonthAndYear(startDate, endDate, request.getMethod());
-
+        return sysLogRepository.getFilteredSysLogByMonthAndYear(startDate, endDate, method);
     }
+
 
     @Override
     public SysLogDelResponse deleteSysLogsFromArg1toArg2(SysLogDelRequest request) {

@@ -12,10 +12,8 @@ import com.example.authentication.response.SysLogResponse;
 import com.example.authentication.service.CSVService;
 import com.example.authentication.service.PDFService;
 import com.example.authentication.service.SysLogService;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
@@ -27,11 +25,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.*;
 import java.text.ParseException;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-
-import static org.apache.tomcat.util.http.FastHttpDateFormat.parseDate;
 
 @RestController
 public class SysLogController {
@@ -94,7 +88,6 @@ public class SysLogController {
             HttpHeaders headers = new HttpHeaders();
             headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=syslogs.csv");
             headers.setContentType(MediaType.parseMediaType("text/csv"));
-//            headers.setContentLength(csvContent.length);
 
             return ResponseEntity.ok()
                     .headers(headers)
