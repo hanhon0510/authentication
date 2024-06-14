@@ -1,5 +1,6 @@
 package com.example.authentication.config.Jwt;
 
+import com.example.authentication.exception.AppException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -66,6 +67,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
+                throw new AppException(401, "You need to login first");
             }
 
             filterChain.doFilter(request, response);
