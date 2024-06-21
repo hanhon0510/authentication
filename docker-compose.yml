@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=12345678
+    ports:
+      - "1433:1433"
+
+  authentication:
+    image: hanhon0510/authentication:latest
+    container_name: authentication
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://sqlserver:1433;databaseName=syslogs
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=12345678
+    depends_on:
+      - sqlserver
+    ports:
+      - "8080:8080"
