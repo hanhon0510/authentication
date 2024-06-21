@@ -29,4 +29,4 @@ jobs:
           TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
           TOMCAT_PASSWORD: ${{ secrets.TOMCAT_PASSWORD }}
         run: |
-          curl -T target/your-app.war "http://${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }}@${{ secrets.TOMCAT_HOST }}/manager/text/deploy?path=/your-app&update=true"
+          curl -T target/authentication-0.0.1-SNAPSHOT.war "http://${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }}@${{ secrets.TOMCAT_HOST }}/manager/text/deploy?path=/your-app&update=true"
