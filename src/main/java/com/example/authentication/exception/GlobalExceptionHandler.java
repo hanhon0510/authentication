@@ -9,6 +9,7 @@ import com.example.authentication.response.BaseResponse;
 import com.example.authentication.utils.ErrorLogUtil;
 import com.example.authentication.utils.MailUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,7 @@ import java.util.Date;
 import java.util.Locale;
 
 @ControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @Autowired
@@ -47,6 +49,7 @@ public class GlobalExceptionHandler {
     private ErrorLogUtil errorLogUtil;
     @ExceptionHandler(value = AppException.class)
     public ResponseEntity<BaseResponse> handleAppException(AppException exception) {
+        log.error(exception.getMessage());
         return ResponseEntity.status(exception.getStatusCode()).body(
                 BaseResponse.builder()
                         .code(exception.getStatusCode())
@@ -73,7 +76,7 @@ public class GlobalExceptionHandler {
         Locale locale = myLocalResolver.resolveLocale(request);
         //mailUtil.sendEmail(errorNotificationConfig.getEmail(), errorNotificationConfig.getSubject(), ex.getMessage());
 
-//        errorLogUtil.logError(ex);
+        errorLogUtil.logError(ex);
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                 BaseResponse.builder()

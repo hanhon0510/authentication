@@ -92,19 +92,21 @@ public class SysLogController {
             return ResponseEntity.ok()
                     .headers(headers)
                     .body(csvContent);
-        } else if (fileType.equalsIgnoreCase("pdf")) {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            pdfService.writeSysLogsToPdf(outputStream, sysLogs);
-
-            byte[] pdfContent = outputStream.toByteArray();
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=syslogs.pdf");
-            headers.setContentType(MediaType.APPLICATION_PDF);
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(pdfContent);
-        } else {
+        }
+//        else if (fileType.equalsIgnoreCase("pdf")) {
+//            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//            pdfService.writeSysLogsToPdf(outputStream, sysLogs);
+//
+//            byte[] pdfContent = outputStream.toByteArray();
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=syslogs.pdf");
+//            headers.setContentType(MediaType.APPLICATION_PDF);
+//
+//            return ResponseEntity.ok()
+//                    .headers(headers)
+//                    .body(pdfContent);
+//        }
+        else {
             throw new AppException(400 ,"Not supported file type");
         }
 

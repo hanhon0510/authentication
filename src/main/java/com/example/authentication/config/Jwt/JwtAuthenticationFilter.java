@@ -67,12 +67,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
-                throw new AppException(401, "You need to login first");
+//                throw new AppException(401, "You need to login first");
             }
 
             filterChain.doFilter(request, response);
         } catch (Exception exception) {
-            handlerExceptionResolver.resolveException(request, response, null, exception);
+            throw new AppException(401, exception.getMessage());
+//            handlerExceptionResolver.resolveException(request, response, null, exception);
         }
     }
 }
